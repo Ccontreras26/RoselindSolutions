@@ -3,5 +3,10 @@ with open('human_genes.fasta', 'r') as file:
 
 out = open('gc_report.txt', 'w')
 
-for gc = (line.count('G') + line.count('C')) / len(line) * 100
+for line in lines:
+    line = line.replace('\n', '')
+    if line.startswith('>'):
+        name = line[1:]
+    else:
+        gc = (line.count('G') + line.count('C')) / len(line) * 100
         out.write(name + '\t' + str(round(gc, 1)) + '\n')
