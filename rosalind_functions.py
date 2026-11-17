@@ -6,38 +6,14 @@ def RNA(s):
     return s.replace("T", "U")
 #REVC
 def REVC(s):
-    complements = {"A": "T", "T": "A", "C": "G", "G": "C"}
-    return "".join([complements[base] for base in s[::-1]])
+    bps = {"A": "T", "T": "A", "C": "G", "G": "C"}
+    return "".join([bps[base] for base in s[::-1]])
 #GC
-def gc_percent(dna):
-    return ((dna.count("G") + dna.count("C")) / len(dna)) * 100
-
-def GC(fasta_text):
-    best_id = ""
-    best_gc = 0.0
-    current_id = ""
-    current_dna = ""
-
-    for line in fasta_text.splitlines():
-        if line.startswith(">"):
-            if current_dna != "":
-                score = gc_percent(current_dna)
-                if score > best_gc:
-                    best_gc = score
-                    best_id = current_id
-            current_id = line[1:]
-            current_dna = ""
-        else:
-            current_dna += line
-
-    if current_dna != "":
-        score = gc_percent(current_dna)
-        if score > best_gc:
-            best_gc = score
-            best_id = current_id
-
-    return best_id, best_gc
-    
+def gc(seq):
+    count_C = seq.count("C")
+    count_G = seq.count("G")
+    gc_% = ((count_C + count_G) / len(seq)) * 100
+    return gc_%
     
 #HAMM
 def HAMM(s, t):
@@ -46,7 +22,6 @@ def HAMM(s, t):
     for i in range(len(s)):
         if s[i] != t[i]:
             mutations += 1
-            
     return mutations
 
 #PROT
@@ -73,28 +48,84 @@ def PROT(s):
     protein = ""
 
     for i in range(0, len(s), 3):
-        codons = s[i:i+3]
-        amino_acid = codon_table[codons]
-
-        if amino_acid == "Stop":
-            break
-
-        protein += amino_acid
-
-    return protein
+        codons = s[i: i + 3]
+        protein.append(codon_table.get(codons, ''))
+           return "".join(protein)
     
 #SUBS
 def SUBS(s, t):
-    locations = []
+    positions = []
     
     for i in range(len(s) - len(t) + 1):
         if s[i : i + len(t)] == t:
-            locations.append(i + 1)
+            positions.append(i + 1)
             
-    return locations
+    return positions
     
-PRTM
+#PRTM
+def PRTM(P):
+    mass_table = {
+        "A": 71.03711,
+        "C": 103.00919,
+        "D": 115.02694,
+        "E": 129.04259,
+        "F": 147.06841,
+        "G": 57.02146,
+        "H": 137.05891,
+        "I": 113.08406,
+        "K": 128.09496,
+        "L": 113.08406,
+        "M": 131.04049,
+        "N": 114.04293,
+        "P": 97.05276,
+        "Q": 128.05858,
+        "R": 156.10111,
+        "S": 87.03203,
+        "T": 101.04768,
+        "V": 99.06841,
+        "W": 186.07931,
+        "Y": 163.06333
+    }
 
-REVP
+    total_weight = 0.0
 
-TRAN
+    for amino_acid in P:
+        total_weight += mass_table[amino_acid]
+
+    return round(total_weight, 3)
+    
+
+#REVP
+def REVP(s):
+    bps= {"A": "T", "T": "A", "C": "G", "G": "C"}
+    results = []
+
+    for i in range(len(s)):
+        for length in range(4, 13, 2):
+            if i + length <= len(s):
+                piece = s[i : i + length]
+                
+                rev_comp = ""
+                for base in piece[::-1]:
+                    rev_comp += bps[base]
+
+                if piece == rev_comp:
+                    results.append((i + 1, length))
+
+    return results
+    
+#TRAN
+def TRAN(DNAstring1: str, DNAstring2: str) -> float:
+    transitions_set = {("A", "G"), ("G", "A"), ("C", "T"), ("T", "C")}
+    transitions = 0
+    transV = 0
+
+    for b1, b2 in zip(DNAstring1, DNAstring2):
+        if b1 != b2:
+            if (b1, b2) in transitions_set:
+                transitions += 1
+            else:
+                transV += 1
+
+    return transitions / transV
+    
